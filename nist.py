@@ -1,8 +1,18 @@
 class Helium(object):
-    
-    TAO = 0.0033033259
-    R   = 0.00831434
-    G   = [  .4558980227431e-04,  .1260692007853e-02,
+    """
+    The Helium-4 gas model. Most property equations come from NIST.
+    """    
+    def __init__(self, temperature, pressure):
+        self.temp = temperature
+        self.p    = pressure
+        self.pp   = self.p / 1.0e6
+
+    def density(self):
+        
+        from math import sqrt
+        TAO = 0.0033033259
+        R   = 0.00831434
+        G   = [  .4558980227431e-04,  .1260692007853e-02,
              -.7139657549318e-02,  .9728903861441e-02, -.1589302471562e-01,
              .1454229259623e-05, -.4708238429298e-04,  .1132915223587e-02,
              .2410763742104e-02, -.5093547838381e-08,  .2699726927900e-05,
@@ -13,20 +23,8 @@ class Helium(object):
              -.2067693644676e-07,  .3850153114958e-07, -.1399040626999e-10,
              -.1888462892389e-11, -.4595138561035e-14,  .6872567403738e-14,
              -.6097223119177e-18, -.7636186157005e-17,  .3848665703556e-17,
-    ]
+        ]
 
-    def __init__(self, temperature, pressure):
-        self.temp = temperature
-        self.p    = pressure
-        self.pp   = self.p / 1.0e6
-
-    def density(self):
-        
-        from math import sqrt
-        R   = Helium.R
-        TAO = Helium.TAO
-        G   = Helium.G
-        
         temp = self.temp
         a1 = R*temp
         a2 = G[0]*temp+G[1]*sqrt(temp)+G[2]+G[3]/temp+G[4]/temp**2
