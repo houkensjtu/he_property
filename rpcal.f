@@ -6,10 +6,10 @@
       T  = 5.0
       RP = 10.0
 
-      do j=1,100
+      do j=1,5
       P = P * 1.5
       call cpu_time(t1)
-      do i=1,1000000
+      do i=1,3
 CC    P  = 1500000.0
       call RPCALCUL(T,RP,P)
 CC    print *,T,RP,P

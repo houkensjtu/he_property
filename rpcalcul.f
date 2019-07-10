@@ -1,4 +1,4 @@
-SUBROUTINE RPCALCUL(T,RP,P)
+      SUBROUTINE RPCALCUL(T,RP,P)
       IMPLICIT DOUBLE PRECISION (A-H,O-Z)
       DIMENSION G(32)
       COMMON /CONSTA/G,R,TAO
@@ -52,6 +52,7 @@ SUBROUTINE RPCALCUL(T,RP,P)
         ELSE
         RP0=160.0D0/4.0026D0
         ENDIF
+
 5       F0=F(RP0)
 10      FP0=FP(RP0)
         IF(DABS(FP0).LE.EPS) THEN
@@ -59,22 +60,22 @@ SUBROUTINE RPCALCUL(T,RP,P)
         GOTO 5
         ELSE
            RP1=RP0-F0/FP0
-        IF (RP1.GT.0.0D0) GOTO 20
-            RP1=RP0+0.1D0*RP0
-20         F1=F(RP1)
-           IF(DABS(F1).LT.EPS) THEN
+           IF (RP1.GT.0.0D0) GOTO 20
+              RP1=RP0+0.1D0*RP0
+20            F1=F(RP1)
+              IF(DABS(F1).LT.EPS) THEN
                 RP=RP1
-           ELSE
+              ELSE
                  IF(DABS((RP1-RP0)/RP0).LT.1.0D-6) THEN
                    RP0=RP0+0.000001D0*RP0
                    GOTO 5
-               ELSE
+                 ELSE
                    RP0=RP1
                    F0=F1
                    GOTO 10
-                ENDIF
-             ENDIF
-        ENDIF
+                 ENDIF
+              ENDIF
+            ENDIF
         RP=RP*4.0026D0
 
         RETURN

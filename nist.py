@@ -2,16 +2,21 @@ class Helium(object):
     """
     The Helium-4 gas model. Most property equations come from NIST.
     """    
-    def __init__(self, temperature, pressure):
+    def __init__(self, temperature, pressure, density):
         self.temp = temperature
         self.p    = pressure
         self.pp   = self.p / 1.0e6
+        self.rp   = density
 
-    def density(self):
-        
-        from math import sqrt
+    def rpcalcul(self):
+        """
+        Return density based on temperature(K) ,pressure(MPa) and 
+        an initial guess rp.
+        """
+        from math import sqrt, exp
         temp = self.temp
         pp   = self.pp
+        rp   = self.rp
         
         _TAO = 0.0033033259
         _R   = 0.00831434
@@ -44,25 +49,51 @@ class Helium(object):
         b11 = _G[27]/temp**2+_G[28]/temp**3
         b13 = _G[29]/temp**2+_G[29]/temp**3+_G[31]/temp**4
         EPS = 1.0e-6
-        
+
+        # f and fp are 2 utility functions
         f = lambda rp : pp - ( rp*a1+rp*rp*a2+rp**3*a3+rp**4*a4+rp**5*a5+rp**6*a6
                              +rp**7*a7+rp**8*a8+rp**9*a9
                              +(rp**3*b3+rp**5*b5+rp**7*b7+rp**9*b9+rp**11*b11
-                             +rp**13*b13) ** (-_TAO*rp*rp))
+                             +rp**13*b13) * exp(-_TAO*rp*rp))
         fp = lambda rp : -(a1+2.0e0*rp*a2+3.0e0*rp**2*a3+4.0e0*rp**3*a4
                          +5.0e0*rp**4*a5+6.0e0*rp**5*a6+7.0e0*rp**6*a7
                          +8.0e0*rp**7*a8+9.0e0*rp**8*a9+(3.0e0*rp**2*b3
                          +5.0e0*rp**4*b5+7.0e0*rp**6*b7+9.0e0*rp**8*b9
-                         +11.0e0*rp**10*b11+13.0e0*rp**12*b13) ** (-_TAO*rp*rp)
+                         +11.0e0*rp**10*b11+13.0e0*rp**12*b13) * exp(-_TAO*rp*rp)
                          +(rp**3*b3+rp**5*b5+rp**7*b7+rp**9*b9+rp**11*b11
-                         +rp**13*b13) ** (-_TAO*rp*rp)*(-2.0e0*_TAO*rp))
+                         +rp**13*b13) * exp(-_TAO*rp*rp)*(-2.0e0*_TAO*rp))
+        
+        # rp0 is a middle parameter
+        rp0 = 0.0
+        if self.temp > 8.0:
+            rp0 = rp/4.0026
+        else:
+            rp0 = 160.0/4.0026
 
-        d = self.temp + self.p
+        # The calculation loop
+        f0  = f(rp0)
+        fp0 = fp(rp0)
+        while abs(fp0) < eps:
+            rp0 = rp0 + 0.00001*rp0
+            fp0 = fp(rp0)
+            f0  = f(rp0)
+
+        rp1 = rp0 - f0/fp0
+        if rp1<=0.0:
+            rp1 = rp0 + 0.1*rp0
+        f1 = f(rp1)
+        if abs(f1)<eps:
+            rp = rp1
+        else if abs((rp1-rp00/rp0)<1.0e-6:
+            rp0 = rp0 + 0.000001*rp0
+
+        
+        d = rp0
         return d
 
 def main():
-    he = Helium(293.0, 2.50)
-    print(he.density())
+    he = Helium(293.0, 2.50, 1)
+    print(he.rpcalcul())
 
 if __name__ == "__main__":
     main()
