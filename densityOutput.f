@@ -1,4 +1,4 @@
-      program helium
+      program densityOutput
       IMPLICIT DOUBLE PRECISION (A-H,O-Z)
       COMMON /CONSTA/G,R,TAO
       
@@ -10,7 +10,7 @@
       do i=1,2
       T = 5.0d0
       P=P+0.01d6
-        do j=1,30000
+        do j=1,100000
         T = T + 0.01
         PP = P/1.0d6 
 CC      call cpu_time(t1)
@@ -25,4 +25,4 @@ CC      print '("P  = ",f6.3 ,", T  = ", f8.3, ", RP = ", f9.4)',PP,T,RP
         end do
         print *,"Current i = ",i
       end do
-      end program helium
+      end program densityOutput
