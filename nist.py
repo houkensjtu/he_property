@@ -2,7 +2,13 @@ class Helium(object):
     """
     The Helium-4 gas model. Most property equations come from NIST.
     """    
-    def __init__(self, temperature, pressure, density):
+    def __init__(self, temperature = 300.0, pressure = 1.0e6, density = 1.0):
+        """ Initialize a Helium object. 
+        Default temperature = 300 K
+        Default pressure = 1.0e6 pa
+        Default density = 1.0
+        when no parameter is given.
+        """
         self.temp = temperature
         self.p    = pressure
         self.pp   = self.p / 1.0e6
@@ -10,7 +16,7 @@ class Helium(object):
 
     def rpcalcul(self):
         """
-        Return density based on temperature(K) ,pressure(MPa) and 
+        Return density(kg/m^3) based on temperature(K) ,pressure(Pa) and 
         an initial guess rp.
         """
         from math import sqrt, exp
@@ -50,11 +56,15 @@ class Helium(object):
         b13 = _G[29]/temp**2+_G[29]/temp**3+_G[31]/temp**4
         EPS = 1.0e-6
 
-        # f and fp are 2 utility functions
+        # f is the function of pressure, density and temperature.
+        # when f(rp,pp,t)=0
+        # means rp is the density solution for pp and t    
         f = lambda rp : pp - ( rp*a1+rp*rp*a2+rp**3*a3+rp**4*a4+rp**5*a5+rp**6*a6
                              +rp**7*a7+rp**8*a8+rp**9*a9
                              +(rp**3*b3+rp**5*b5+rp**7*b7+rp**9*b9+rp**11*b11
                              +rp**13*b13) * exp(-_TAO*rp*rp))
+
+        # fp is the derivative df/d(rp) of f
         fp = lambda rp : -(a1+2.0e0*rp*a2+3.0e0*rp**2*a3+4.0e0*rp**3*a4
                          +5.0e0*rp**4*a5+6.0e0*rp**5*a6+7.0e0*rp**6*a7
                          +8.0e0*rp**7*a8+9.0e0*rp**8*a9+(3.0e0*rp**2*b3
@@ -62,38 +72,29 @@ class Helium(object):
                          +11.0e0*rp**10*b11+13.0e0*rp**12*b13) * exp(-_TAO*rp*rp)
                          +(rp**3*b3+rp**5*b5+rp**7*b7+rp**9*b9+rp**11*b11
                          +rp**13*b13) * exp(-_TAO*rp*rp)*(-2.0e0*_TAO*rp))
-        
-        # rp0 is a middle parameter
+
+        # Give an initial guess of rp based on temperature.
         rp0 = 0.0
         if self.temp > 8.0:
-            rp0 = rp/4.0026
+            rp0 = rp / 4.0026
         else:
-            rp0 = 160.0/4.0026
+            rp0 = 160.0 / 4.0026
 
-        # The calculation loop
-        f0  = f(rp0)
-        fp0 = fp(rp0)
-        while abs(fp0) < eps:
-            rp0 = rp0 + 0.00001*rp0
+        # The Newton root-finding algorithm
+        while abs(f(rp0)) > EPS:
+            f0 = f(rp0)
             fp0 = fp(rp0)
-            f0  = f(rp0)
+            rp0 = rp0 - f0 / fp0
+            if rp0 <= 0.0:
+                rp0 = rp0 + 0.1 * rp0
 
-        rp1 = rp0 - f0/fp0
-        if rp1<=0.0:
-            rp1 = rp0 + 0.1*rp0
-        f1 = f(rp1)
-        if abs(f1)<eps:
-            rp = rp1
-        else if abs((rp1-rp00/rp0)<1.0e-6:
-            rp0 = rp0 + 0.000001*rp0
+        return rp0 * 4.0026
 
-        
-        d = rp0
-        return d
 
 def main():
-    he = Helium(293.0, 2.50, 1)
-    print(he.rpcalcul())
+    for t in range(4, 300, 10):
+        he = Helium(temperature=t, pressure=.5e6)
+        print (t, he.rpcalcul())
 
 if __name__ == "__main__":
     main()
