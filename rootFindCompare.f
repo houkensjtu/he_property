@@ -6,7 +6,6 @@
       T  = 3.0d0
       RP = 0.0
       RP0 = 0.0
-      
       do i=1,600
         T = T * 1.1
         call cpu_time(t1)
